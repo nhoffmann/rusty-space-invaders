@@ -11,6 +11,7 @@ A [Space Invaders](https://en.wikipedia.org/wiki/Space_Invaders) clone written i
 * [ ] Make sure that the player’s laser beams will destroy invaders, and the invader bombs will destroy the player.
 * [ ] Add a mothership that will cross the screen periodically. Destroying it will result in bonus points.
 * [ ] Add a UI that tracks the player score and lives left. The player starts with three lives.
+* [ ] Add nice pixel graphics like in the original game.
 
 ## Stretch goal
 * [ ] The original game had bunkers that alien bombs and player rockets would slowly destroy. Some console ports had bunkers that would be destroyed after a certain number of hits. Others omitted bunkers entirely, or made different bunkers for different levels. Feel free to add any type of bunker to the game.
