@@ -9,8 +9,8 @@ pub struct CannonBundle {
     sprite: SpriteBundle,
 }
 
-impl Default for CannonBundle {
-    fn default() -> Self {
+impl CannonBundle {
+    pub fn new() -> Self {
         Self {
             marker: Cannon {},
             sprite: SpriteBundle {
@@ -32,6 +32,32 @@ impl Default for CannonBundle {
 #[derive(Component, Clone, Copy, Debug)]
 pub struct LaserBeam;
 
+#[derive(Bundle)]
+pub struct LaserBeamBundle {
+    marker: LaserBeam,
+    sprite: SpriteBundle,
+}
+
+impl LaserBeamBundle {
+    pub fn new(x: f32, y: f32) -> Self {
+        Self {
+            marker: LaserBeam {},
+            sprite: SpriteBundle {
+                sprite: Sprite {
+                    color: SPRITE_COLOR,
+                    ..default()
+                },
+                transform: Transform {
+                    scale: Vec2::new(1., 10.).extend(1.),
+                    translation: Vec2::new(x, y + SPRITE_SIZE / 2.).extend(0.),
+                    ..default()
+                },
+                ..default()
+            },
+        }
+    }
+}
+
 #[derive(Component)]
 pub struct Enemy;
 
@@ -42,13 +68,7 @@ pub struct EnemyBundle {
 }
 
 impl EnemyBundle {
-    pub fn transform(&mut self, x: f32, y: f32) {
-        self.sprite.transform.translation = Vec2::new(x, y).extend(0.);
-    }
-}
-
-impl Default for EnemyBundle {
-    fn default() -> Self {
+    pub fn new(x: f32, y: f32) -> Self {
         Self {
             marker: Enemy {},
             sprite: SpriteBundle {
@@ -57,7 +77,8 @@ impl Default for EnemyBundle {
                     ..default()
                 },
                 transform: Transform {
-                    scale: Vec2::new(SPRITE_SIZE, SPRITE_SIZE).extend(0.),
+                    scale: Vec2::new(SPRITE_SIZE, SPRITE_SIZE).extend(1.),
+                    translation: Vec2::new(x, y).extend(0.),
                     ..default()
                 },
                 ..default()

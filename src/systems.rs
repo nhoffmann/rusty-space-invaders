@@ -72,24 +72,9 @@ pub fn fire_laser(
     let cannon_transform = cannon_query.single();
 
     for _ in fired_event_reader.read() {
-        commands.spawn((
-            SpriteBundle {
-                sprite: Sprite {
-                    color: SPRITE_COLOR,
-                    ..default()
-                },
-                transform: Transform {
-                    scale: Vec2::new(1., 10.).extend(0.),
-                    translation: Vec2::new(
-                        cannon_transform.translation.x,
-                        cannon_transform.translation.y + SPRITE_SIZE / 2.,
-                    )
-                    .extend(0.),
-                    ..default()
-                },
-                ..default()
-            },
-            LaserBeam {},
+        commands.spawn(LaserBeamBundle::new(
+            cannon_transform.translation.x,
+            cannon_transform.translation.y,
         ));
     }
 }
