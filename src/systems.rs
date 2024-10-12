@@ -1,6 +1,9 @@
+use bevy::math::bounding::{Aabb2d, IntersectsVolume};
+
 use crate::prelude::*;
 
-const LASER_SPEED: f32 = 6.;
+const LASER_SPEED: f32 = 8.;
+const CANNON_SPEED: f32 = 3.;
 
 #[derive(Clone, Copy, Debug)]
 pub enum ControllerDirection {
@@ -52,10 +55,16 @@ pub fn move_cannon(
         }
     }
 
-    let new_cannon_position = cannon_transform.translation.x + direction;
+    let new_cannon_position = cannon_transform.translation.x + direction * CANNON_SPEED;
 
     cannon_transform.translation.x =
         new_cannon_position.clamp(LEFT_WALL + SPRITE_SIZE / 2., RIGHT_WALL - SPRITE_SIZE / 2.);
+}
+
+pub fn move_enemies(mut enemy_query: Query<&mut Transform, With<Enemy>>) {
+    enemy_query.iter_mut().for_each(|mut transform| {
+        transform.translation.x += 2.;
+    });
 }
 
 pub fn fire_laser(
@@ -88,6 +97,38 @@ pub fn move_laser_beam(
 
         if laser_beam_transform.translation.y >= TOP_WALL {
             commands.entity(entity).despawn_recursive();
+        }
+    }
+}
+
+pub fn detect_laser_hit(
+    mut commands: Commands,
+    laser_beam_query: Query<(Entity, &Transform), With<LaserBeam>>,
+    enemy_query: Query<(Entity, &Transform), With<Enemy>>,
+    mut collision_event_writer: EventWriter<CollisionEvent>,
+) {
+    if let Ok((laser_beam_entity, laser_beam_transform)) = laser_beam_query.get_single() {
+        let laser_beam_bounding_box: Aabb2d = Aabb2d::new(
+            laser_beam_transform.translation.truncate(),
+            laser_beam_transform.scale.truncate() / 2.,
+        );
+
+        for (enemy_entity, enemy_transform) in enemy_query.iter() {
+            let enemy_bounding_box: Aabb2d = Aabb2d::new(
+                enemy_transform.translation.truncate(),
+                enemy_transform.scale.truncate() / 2.,
+            );
+
+            if enemy_bounding_box.intersects(&laser_beam_bounding_box) {
+                collision_event_writer.send_default();
+                info!(
+                    "Hit {:?} <> {:?}",
+                    enemy_bounding_box, laser_beam_bounding_box
+                );
+
+                commands.entity(laser_beam_entity).despawn();
+                commands.entity(enemy_entity).despawn();
+            }
         }
     }
 }

@@ -1,5 +1,8 @@
 use crate::prelude::*;
 
+#[derive(Event, Default)]
+pub struct CollisionEvent;
+
 #[derive(Component, Clone, Copy, Debug)]
 pub struct Cannon;
 

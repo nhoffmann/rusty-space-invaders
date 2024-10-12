@@ -34,8 +34,18 @@ fn main() {
         }))
         .add_systems(Startup, (spawn_camera, spawn_cannon, spawn_enemies).chain())
         .add_systems(Update, player_input)
-        .add_systems(FixedUpdate, (move_cannon, fire_laser, move_laser_beam))
+        .add_systems(
+            FixedUpdate,
+            (
+                move_cannon,
+                fire_laser,
+                move_laser_beam,
+                detect_laser_hit,
+                move_enemies,
+            ),
+        )
         .add_event::<ControllerEvent>()
         .add_event::<Fired>()
+        .add_event::<CollisionEvent>()
         .run();
 }
