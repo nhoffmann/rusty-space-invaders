@@ -5,19 +5,17 @@ pub fn spawn_camera(mut commands: Commands) {
 }
 
 pub fn spawn_cannon(mut commands: Commands) {
-    commands.spawn((
-        SpriteBundle {
-            sprite: Sprite {
-                color: SPRITE_COLOR,
-                ..default()
-            },
-            transform: Transform {
-                scale: Vec3::new(SPRITE_SIZE, SPRITE_SIZE, 0.),
-                translation: Vec2::new(0., BOTTOM_WALL + SPRITE_SIZE).extend(0.),
-                ..default()
-            },
-            ..default()
-        },
-        Cannon {},
-    ));
+    commands.spawn(CannonBundle::default());
+}
+
+pub fn spawn_enemies(mut commands: Commands) {
+    // spawns a row of enemies
+    for index in 0..11 {
+        let mut enemy = EnemyBundle::default();
+
+        let offset = (SPRITE_SIZE + 1.) * index as f32 - SCREEN_WIDTH / 2. + SPRITE_SIZE;
+        enemy.transform(offset, TOP_WALL - SPRITE_SIZE);
+
+        commands.spawn(enemy);
+    }
 }

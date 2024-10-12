@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-const LASER_SPEED: f32 = 4.;
+const LASER_SPEED: f32 = 6.;
 
 #[derive(Clone, Copy, Debug)]
 pub enum ControllerDirection {
@@ -79,7 +79,7 @@ pub fn fire_laser(
                     ..default()
                 },
                 transform: Transform {
-                    scale: Vec2::new(5., 20.).extend(0.),
+                    scale: Vec2::new(1., 10.).extend(0.),
                     translation: Vec2::new(
                         cannon_transform.translation.x,
                         cannon_transform.translation.y + SPRITE_SIZE / 2.,

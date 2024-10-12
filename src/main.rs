@@ -3,7 +3,6 @@ mod spawners;
 mod systems;
 
 mod prelude {
-    pub use bevy::prelude::*;
     pub const SCREEN_WIDTH: f32 = 224. * 2.;
     pub const SCREEN_HEIGHT: f32 = 256. * 2.;
     pub const SPRITE_COLOR: Color = Color::srgb(1., 1., 1.);
@@ -14,9 +13,11 @@ mod prelude {
     pub const BOTTOM_WALL: f32 = SCREEN_HEIGHT / -2. + BOTTOM_MENU_HEIGHT;
     pub const LEFT_WALL: f32 = SCREEN_WIDTH / -2.;
     pub const SPRITE_SIZE: f32 = 32.;
+
     pub use crate::components::*;
     pub use crate::spawners::*;
     pub use crate::systems::*;
+    pub use bevy::prelude::*;
 }
 
 use prelude::*;
@@ -31,7 +32,7 @@ fn main() {
             }),
             ..default()
         }))
-        .add_systems(Startup, (spawn_camera, spawn_cannon).chain())
+        .add_systems(Startup, (spawn_camera, spawn_cannon, spawn_enemies).chain())
         .add_systems(Update, player_input)
         .add_systems(FixedUpdate, (move_cannon, fire_laser, move_laser_beam))
         .add_event::<ControllerEvent>()
