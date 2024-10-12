@@ -12,8 +12,8 @@ pub fn spawn_cannon(mut commands: Commands) {
                 ..default()
             },
             transform: Transform {
-                scale: Vec3::new(SPRITE_SIZE, SPRITE_SIZE, 1.),
-                translation: Vec3::ZERO,
+                scale: Vec3::new(SPRITE_SIZE, SPRITE_SIZE, 0.),
+                translation: Vec2::new(0., BOTTOM_WALL + SPRITE_SIZE).extend(0.),
                 ..default()
             },
             ..default()

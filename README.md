@@ -6,7 +6,7 @@ A [Space Invaders](https://en.wikipedia.org/wiki/Space_Invaders) clone written i
 * [x] Create a player ship that moves side to side.
 * [ ] Create a few different types of alien invaders.
 * [ ] Enemies will move together in a grid. They cross the screen horizontally before dropping vertically and reversing their direction.
-* [ ] Add the ability for the player ship to fire a laser beam that travels up the screen. In the original game, you need to wait until the projectile either hits something or exits the screen before being able to fire again.
+* [x] Add the ability for the player ship to fire a laser beam that travels up the screen. In the original game, you need to wait until the projectile either hits something or exits the screen before being able to fire again.
 * [ ] Add bombs that the enemies drop. The player’s laser can destroy enemy bombs.
 * [ ] Make sure that the player’s laser beams will destroy invaders, and the invader bombs will destroy the player.
 * [ ] Add a mothership that will cross the screen periodically. Destroying it will result in bonus points.
