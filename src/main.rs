@@ -18,6 +18,7 @@ mod prelude {
     pub use crate::spawners::*;
     pub use crate::systems::*;
     pub use bevy::prelude::*;
+    pub use rand::prelude::random;
 }
 
 use prelude::*;
@@ -33,6 +34,7 @@ fn main() {
             ..default()
         }))
         .insert_resource(EnemyMovement::new())
+        .insert_resource(Player::new())
         .add_systems(Startup, (spawn_camera, spawn_cannon, spawn_enemies).chain())
         .add_systems(Update, player_input)
         .add_systems(
@@ -44,11 +46,15 @@ fn main() {
                 detect_laser_hit,
                 move_enemies_horizontal,
                 move_enemies_vertical,
+                drop_bomb,
+                move_bomb,
+                detect_bomb_hit,
             ),
         )
         .add_event::<ControllerEvent>()
         .add_event::<Fired>()
         .add_event::<CollisionEvent>()
         .add_event::<EnemyAdvancement>()
+        .add_event::<PlayerHitEvent>()
         .run();
 }

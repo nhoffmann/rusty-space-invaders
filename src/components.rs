@@ -1,6 +1,26 @@
 use crate::prelude::*;
 
 #[derive(Resource)]
+pub struct Player {
+    lifes: i8,
+}
+
+impl Player {
+    pub fn new() -> Self {
+        Self { lifes: 3 }
+    }
+
+    pub fn kill(&mut self) {
+        info!("Player died");
+        self.lifes -= 1;
+
+        if self.lifes == 0 {
+            info!("GAME OVER!")
+        }
+    }
+}
+
+#[derive(Resource)]
 pub struct EnemyMovement {
     pub direction: f32,
     pub speed: f32,
@@ -33,6 +53,9 @@ pub struct EnemyAdvancement;
 
 #[derive(Event, Default)]
 pub struct CollisionEvent;
+
+#[derive(Event, Default)]
+pub struct PlayerHitEvent;
 
 #[derive(Component, Clone, Copy, Debug)]
 pub struct Cannon;
@@ -84,6 +107,35 @@ impl LaserBeamBundle {
                 transform: Transform {
                     scale: Vec2::new(1., 10.).extend(1.),
                     translation: Vec2::new(x, y + SPRITE_SIZE / 2.).extend(0.),
+                    ..default()
+                },
+                ..default()
+            },
+        }
+    }
+}
+
+#[derive(Component)]
+pub struct Bomb;
+
+#[derive(Bundle)]
+pub struct BombBundle {
+    marker: Bomb,
+    sprite: SpriteBundle,
+}
+
+impl BombBundle {
+    pub fn new(x: f32, y: f32) -> Self {
+        Self {
+            marker: Bomb,
+            sprite: SpriteBundle {
+                sprite: Sprite {
+                    color: SPRITE_COLOR,
+                    ..default()
+                },
+                transform: Transform {
+                    scale: Vec2::new(3., 10.).extend(1.),
+                    translation: Vec2::new(x, y).extend(0.),
                     ..default()
                 },
                 ..default()

@@ -4,6 +4,7 @@ use crate::prelude::*;
 
 const LASER_SPEED: f32 = 8.;
 const CANNON_SPEED: f32 = 3.;
+const BOMB_SPEED: f32 = 2.;
 
 #[derive(Clone, Copy, Debug)]
 pub enum ControllerDirection {
@@ -150,6 +151,62 @@ pub fn detect_laser_hit(
                 commands.entity(laser_beam_entity).despawn();
                 commands.entity(enemy_entity).despawn();
             }
+        }
+    }
+}
+
+pub fn drop_bomb(mut commands: Commands, enemy_query: Query<&Transform, With<Enemy>>) {
+    for transform in enemy_query.iter() {
+        if random::<f32>() * 1000. <= 1. {
+            commands.spawn(BombBundle::new(
+                transform.translation.x,
+                transform.translation.y,
+            ));
+        }
+    }
+}
+
+pub fn move_bomb(
+    mut commands: Commands,
+    mut bomb_query: Query<(Entity, &mut Transform), With<Bomb>>,
+) {
+    bomb_query
+        .iter_mut()
+        .for_each(|(entity, mut bomb_transform)| {
+            bomb_transform.translation.y -= 1. * BOMB_SPEED;
+
+            if bomb_transform.translation.y <= BOTTOM_WALL {
+                commands.entity(entity).despawn();
+            }
+        });
+}
+
+pub fn detect_bomb_hit(
+    mut commands: Commands,
+    bomb_query: Query<(Entity, &Transform), With<Bomb>>,
+    cannon_qery: Query<&Transform, With<Cannon>>,
+    mut player_hit_event_writer: EventWriter<PlayerHitEvent>,
+    mut player: ResMut<Player>,
+) {
+    let cannon_transform = cannon_qery.single();
+
+    let cannon_bounding_box = Aabb2d::new(
+        cannon_transform.translation.truncate(),
+        cannon_transform.scale.truncate() / 2.,
+    );
+
+    for (bomb_entity, bomb_transform) in bomb_query.iter() {
+        let bomb_bounding_box = Aabb2d::new(
+            bomb_transform.translation.truncate(),
+            bomb_transform.scale.truncate() / 2.,
+        );
+
+        if bomb_bounding_box.intersects(&cannon_bounding_box) {
+            commands.entity(bomb_entity).despawn();
+
+            player.kill();
+
+            player_hit_event_writer.send_default();
         }
     }
 }
