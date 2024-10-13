@@ -61,10 +61,35 @@ pub fn move_cannon(
         new_cannon_position.clamp(LEFT_WALL + SPRITE_SIZE / 2., RIGHT_WALL - SPRITE_SIZE / 2.);
 }
 
-pub fn move_enemies(mut enemy_query: Query<&mut Transform, With<Enemy>>) {
+pub fn move_enemies_horizontal(
+    mut enemy_query: Query<&mut Transform, With<Enemy>>,
+    mut enemy_movement: ResMut<EnemyMovement>,
+    mut enemy_advancement_event_writer: EventWriter<EnemyAdvancement>,
+) {
     enemy_query.iter_mut().for_each(|mut transform| {
-        transform.translation.x += 2.;
+        transform.translation.x += enemy_movement.speed * enemy_movement.direction;
+
+        if transform.translation.x + SPRITE_SIZE / 2. >= RIGHT_WALL {
+            enemy_movement.level_up();
+            enemy_advancement_event_writer.send_default();
+        }
+
+        if transform.translation.x - SPRITE_SIZE / 2. < LEFT_WALL {
+            enemy_movement.level_up();
+            enemy_advancement_event_writer.send_default();
+        }
     });
+}
+
+pub fn move_enemies_vertical(
+    mut enemy_query: Query<&mut Transform, With<Enemy>>,
+    mut enemy_advancement_event_reader: EventReader<EnemyAdvancement>,
+) {
+    for _ in enemy_advancement_event_reader.read() {
+        enemy_query.iter_mut().for_each(|mut transform| {
+            transform.translation.y -= SPRITE_SIZE;
+        });
+    }
 }
 
 pub fn fire_laser(
@@ -121,10 +146,6 @@ pub fn detect_laser_hit(
 
             if enemy_bounding_box.intersects(&laser_beam_bounding_box) {
                 collision_event_writer.send_default();
-                info!(
-                    "Hit {:?} <> {:?}",
-                    enemy_bounding_box, laser_beam_bounding_box
-                );
 
                 commands.entity(laser_beam_entity).despawn();
                 commands.entity(enemy_entity).despawn();

@@ -32,6 +32,7 @@ fn main() {
             }),
             ..default()
         }))
+        .insert_resource(EnemyMovement::new())
         .add_systems(Startup, (spawn_camera, spawn_cannon, spawn_enemies).chain())
         .add_systems(Update, player_input)
         .add_systems(
@@ -41,11 +42,13 @@ fn main() {
                 fire_laser,
                 move_laser_beam,
                 detect_laser_hit,
-                move_enemies,
+                move_enemies_horizontal,
+                move_enemies_vertical,
             ),
         )
         .add_event::<ControllerEvent>()
         .add_event::<Fired>()
         .add_event::<CollisionEvent>()
+        .add_event::<EnemyAdvancement>()
         .run();
 }

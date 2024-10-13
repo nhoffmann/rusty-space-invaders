@@ -1,5 +1,36 @@
 use crate::prelude::*;
 
+#[derive(Resource)]
+pub struct EnemyMovement {
+    pub direction: f32,
+    pub speed: f32,
+}
+
+impl EnemyMovement {
+    pub fn new() -> Self {
+        Self {
+            direction: 1.,
+            speed: 0.4,
+        }
+    }
+
+    pub fn level_up(&mut self) {
+        self.reverse_direction();
+        self.increase_speed();
+    }
+
+    fn reverse_direction(&mut self) {
+        self.direction *= -1.;
+    }
+
+    fn increase_speed(&mut self) {
+        self.speed += 0.02;
+    }
+}
+
+#[derive(Event, Default)]
+pub struct EnemyAdvancement;
+
 #[derive(Event, Default)]
 pub struct CollisionEvent;
 
