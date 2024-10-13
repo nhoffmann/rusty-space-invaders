@@ -4,7 +4,7 @@ use crate::prelude::*;
 
 const LASER_SPEED: f32 = 8.;
 const CANNON_SPEED: f32 = 3.;
-const BOMB_SPEED: f32 = 2.;
+const BOMB_SPEED: f32 = 1.;
 
 #[derive(Clone, Copy, Debug)]
 pub enum ControllerDirection {
@@ -131,6 +131,7 @@ pub fn detect_laser_hit(
     mut commands: Commands,
     laser_beam_query: Query<(Entity, &Transform), With<LaserBeam>>,
     enemy_query: Query<(Entity, &Transform), With<Enemy>>,
+    bomb_query: Query<(Entity, &Transform), With<Bomb>>,
     mut collision_event_writer: EventWriter<CollisionEvent>,
 ) {
     if let Ok((laser_beam_entity, laser_beam_transform)) = laser_beam_query.get_single() {
@@ -139,17 +140,17 @@ pub fn detect_laser_hit(
             laser_beam_transform.scale.truncate() / 2.,
         );
 
-        for (enemy_entity, enemy_transform) in enemy_query.iter() {
-            let enemy_bounding_box: Aabb2d = Aabb2d::new(
-                enemy_transform.translation.truncate(),
-                enemy_transform.scale.truncate() / 2.,
+        for (entity, transform) in enemy_query.iter().chain(bomb_query.iter()) {
+            let bounding_box: Aabb2d = Aabb2d::new(
+                transform.translation.truncate(),
+                transform.scale.truncate() / 2.,
             );
 
-            if enemy_bounding_box.intersects(&laser_beam_bounding_box) {
+            if bounding_box.intersects(&laser_beam_bounding_box) {
                 collision_event_writer.send_default();
 
                 commands.entity(laser_beam_entity).despawn();
-                commands.entity(enemy_entity).despawn();
+                commands.entity(entity).despawn();
             }
         }
     }

@@ -134,7 +134,7 @@ impl BombBundle {
                     ..default()
                 },
                 transform: Transform {
-                    scale: Vec2::new(3., 10.).extend(1.),
+                    scale: Vec2::new(10., 30.).extend(1.),
                     translation: Vec2::new(x, y).extend(0.),
                     ..default()
                 },
