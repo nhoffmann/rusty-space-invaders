@@ -3,11 +3,12 @@ use crate::prelude::*;
 #[derive(Resource)]
 pub struct Player {
     lifes: i8,
+    score: i32,
 }
 
 impl Player {
     pub fn new() -> Self {
-        Self { lifes: 3 }
+        Self { lifes: 3, score: 0 }
     }
 
     pub fn kill(&mut self) {
@@ -21,6 +22,14 @@ impl Player {
 
     pub fn lifes_left(&self) -> String {
         self.lifes.to_string()
+    }
+
+    pub fn add_to_score(&mut self, add: i32) {
+        self.score += add;
+    }
+
+    pub fn score(&self) -> String {
+        self.score.to_string()
     }
 }
 
@@ -179,3 +188,6 @@ impl EnemyBundle {
 
 #[derive(Component)]
 pub struct LifesUI;
+
+#[derive(Component)]
+pub struct ScoreUI;

@@ -129,6 +129,7 @@ pub fn move_laser_beam(
 
 pub fn detect_laser_hit(
     mut commands: Commands,
+    mut player: ResMut<Player>,
     laser_beam_query: Query<(Entity, &Transform), With<LaserBeam>>,
     enemy_query: Query<(Entity, &Transform), With<Enemy>>,
     bomb_query: Query<(Entity, &Transform), With<Bomb>>,
@@ -148,6 +149,7 @@ pub fn detect_laser_hit(
 
             if bounding_box.intersects(&laser_beam_bounding_box) {
                 collision_event_writer.send_default();
+                player.add_to_score(10);
 
                 commands.entity(laser_beam_entity).despawn();
                 commands.entity(entity).despawn();
@@ -215,4 +217,9 @@ pub fn detect_bomb_hit(
 pub fn update_lifes_ui(player: Res<Player>, mut lifes_ui_query: Query<&mut Text, With<LifesUI>>) {
     let mut text = lifes_ui_query.single_mut();
     text.sections[0].value = player.lifes_left();
+}
+
+pub fn update_score_ui(player: Res<Player>, mut score_ui_query: Query<&mut Text, With<ScoreUI>>) {
+    let mut text = score_ui_query.single_mut();
+    text.sections[0].value = player.score();
 }

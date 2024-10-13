@@ -39,9 +39,15 @@ fn main() {
         .insert_resource(Player::new())
         .add_systems(
             Startup,
-            (spawn_camera, spawn_cannon, spawn_enemies, spawn_lifes_ui),
+            (
+                spawn_camera,
+                spawn_cannon,
+                spawn_enemies,
+                spawn_lifes_ui,
+                spawn_score_ui,
+            ),
         )
-        .add_systems(Update, (player_input, update_lifes_ui))
+        .add_systems(Update, (player_input, update_lifes_ui, update_score_ui))
         .add_systems(
             FixedUpdate,
             (
