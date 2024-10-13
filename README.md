@@ -14,5 +14,6 @@ A [Space Invaders](https://en.wikipedia.org/wiki/Space_Invaders) clone written i
 * [ ] Add nice pixel graphics like in the original game.
 
 ## Stretch goal
+* [ ] Animte the graphics like in the original game
 * [ ] The original game had bunkers that alien bombs and player's laser would slowly destroy. Some console ports had bunkers that would be destroyed after a certain number of hits. Others omitted bunkers entirely, or made different bunkers for different levels. Feel free to add any type of bunker to the game.
 * [ ] Have fun with particle effects! You aren’t restricted to the original hardware, so feel free to add as much game juice (particles, sounds, screen shake) as possible.

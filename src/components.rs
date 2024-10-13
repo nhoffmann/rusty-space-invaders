@@ -18,6 +18,10 @@ impl Player {
             info!("GAME OVER!")
         }
     }
+
+    pub fn lifes_left(&self) -> String {
+        self.lifes.to_string()
+    }
 }
 
 #[derive(Resource)]
@@ -69,7 +73,7 @@ pub struct CannonBundle {
 impl CannonBundle {
     pub fn new() -> Self {
         Self {
-            marker: Cannon {},
+            marker: Cannon,
             sprite: SpriteBundle {
                 sprite: Sprite {
                     color: SPRITE_COLOR,
@@ -98,7 +102,7 @@ pub struct LaserBeamBundle {
 impl LaserBeamBundle {
     pub fn new(x: f32, y: f32) -> Self {
         Self {
-            marker: LaserBeam {},
+            marker: LaserBeam,
             sprite: SpriteBundle {
                 sprite: Sprite {
                     color: SPRITE_COLOR,
@@ -156,7 +160,7 @@ pub struct EnemyBundle {
 impl EnemyBundle {
     pub fn new(x: f32, y: f32) -> Self {
         Self {
-            marker: Enemy {},
+            marker: Enemy,
             sprite: SpriteBundle {
                 sprite: Sprite {
                     color: SPRITE_COLOR,
@@ -172,3 +176,6 @@ impl EnemyBundle {
         }
     }
 }
+
+#[derive(Component)]
+pub struct LifesUI;

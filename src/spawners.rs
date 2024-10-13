@@ -8,6 +8,33 @@ pub fn spawn_cannon(mut commands: Commands) {
     commands.spawn(CannonBundle::new());
 }
 
+pub fn spawn_lifes_ui(mut commands: Commands) {
+    commands.spawn((
+        TextBundle::from_sections([
+            TextSection::new(
+                "Lifes left: ",
+                TextStyle {
+                    font_size: TEXT_SIZE,
+                    color: TEXT_COLOR,
+                    ..default()
+                },
+            ),
+            TextSection::from_style(TextStyle {
+                font_size: TEXT_SIZE,
+                color: TEXT_COLOR,
+                ..default()
+            }),
+        ])
+        .with_style(Style {
+            position_type: PositionType::Absolute,
+            top: Val::Px(SCREEN_HEIGHT - BOTTOM_MENU_HEIGHT),
+            left: Val::Px(0.),
+            ..default()
+        }),
+        LifesUI,
+    ));
+}
+
 pub fn spawn_enemies(mut commands: Commands) {
     let mut y = TOP_WALL - SPRITE_SIZE;
 

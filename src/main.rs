@@ -6,6 +6,8 @@ mod prelude {
     pub const SCREEN_WIDTH: f32 = 224. * 2.;
     pub const SCREEN_HEIGHT: f32 = 256. * 2.;
     pub const SPRITE_COLOR: Color = Color::srgb(1., 1., 1.);
+    pub const TEXT_COLOR: Color = Color::srgb(1., 1., 1.);
+    pub const TEXT_SIZE: f32 = 32.;
     pub const TOP_MENU_HEIGHT: f32 = 50.;
     pub const BOTTOM_MENU_HEIGHT: f32 = 30.;
     pub const TOP_WALL: f32 = (SCREEN_HEIGHT / 2.) - TOP_MENU_HEIGHT;
@@ -35,8 +37,11 @@ fn main() {
         }))
         .insert_resource(EnemyMovement::new())
         .insert_resource(Player::new())
-        .add_systems(Startup, (spawn_camera, spawn_cannon, spawn_enemies).chain())
-        .add_systems(Update, player_input)
+        .add_systems(
+            Startup,
+            (spawn_camera, spawn_cannon, spawn_enemies, spawn_lifes_ui),
+        )
+        .add_systems(Update, (player_input, update_lifes_ui))
         .add_systems(
             FixedUpdate,
             (

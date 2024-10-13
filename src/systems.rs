@@ -211,3 +211,8 @@ pub fn detect_bomb_hit(
         }
     }
 }
+
+pub fn update_lifes_ui(player: Res<Player>, mut lifes_ui_query: Query<&mut Text, With<LifesUI>>) {
+    let mut text = lifes_ui_query.single_mut();
+    text.sections[0].value = player.lifes_left();
+}
