@@ -4,7 +4,7 @@ A [Space Invaders](https://en.wikipedia.org/wiki/Space_Invaders) clone written i
 
 ## Goal
 * [x] Create a player cannon that moves side to side.
-* [ ] Create a few different types of alien invaders.
+* [x] Create a few different types of alien invaders.
 * [x] Enemies will move together in a grid. They cross the screen horizontally before dropping vertically and reversing their direction.
 * [x] Add the ability for the player ship to fire a laser beam that travels up the screen. In the original game, you need to wait until the projectile either hits something or exits the screen before being able to fire again.
 * [x] Add bombs that the enemies drop. The player’s laser can destroy enemy bombs. 

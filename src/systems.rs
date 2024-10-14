@@ -1,4 +1,7 @@
-use bevy::math::bounding::{Aabb2d, IntersectsVolume};
+use bevy::math::{
+    bounding::{Aabb2d, IntersectsVolume},
+    VectorSpace,
+};
 
 use crate::prelude::*;
 
@@ -130,8 +133,7 @@ pub fn detect_laser_hit(
     mut commands: Commands,
     mut player: ResMut<Player>,
     laser_beam_query: Query<(Entity, &Transform), With<LaserBeam>>,
-    enemy_query: Query<(Entity, &Transform), With<Enemy>>,
-    bomb_query: Query<(Entity, &Transform), With<Bomb>>,
+    hitable_query: Query<(Entity, &Transform, Option<&Enemy>, Option<&Bomb>), With<Hitable>>,
     mut collision_event_writer: EventWriter<CollisionEvent>,
 ) {
     if let Ok((laser_beam_entity, laser_beam_transform)) = laser_beam_query.get_single() {
@@ -140,15 +142,25 @@ pub fn detect_laser_hit(
             laser_beam_transform.scale.truncate() / 2.,
         );
 
-        for (entity, transform) in enemy_query.iter().chain(bomb_query.iter()) {
-            let bounding_box: Aabb2d = Aabb2d::new(
-                transform.translation.truncate(),
-                transform.scale.truncate() / 2.,
-            );
+        for (entity, transform, maybe_enemy, maybe_bomb) in hitable_query.iter() {
+            let mut size: Vec2 = Vec2::ZERO;
+            let mut points: i32 = 0;
+
+            if maybe_enemy.is_some() {
+                let enemy = maybe_enemy.unwrap();
+                points = enemy.points as i32;
+                size = enemy.size;
+            }
+            if maybe_bomb.is_some() {
+                let bomb = maybe_bomb.unwrap();
+                size = bomb.size;
+            }
+
+            let bounding_box: Aabb2d = Aabb2d::new(transform.translation.truncate(), size / 2.);
 
             if bounding_box.intersects(&laser_beam_bounding_box) {
                 collision_event_writer.send_default();
-                player.add_to_score(10);
+                player.add_to_score(points);
 
                 commands.entity(laser_beam_entity).despawn();
                 commands.entity(entity).despawn();
