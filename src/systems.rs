@@ -1,7 +1,4 @@
-use bevy::math::{
-    bounding::{Aabb2d, IntersectsVolume},
-    VectorSpace,
-};
+use bevy::math::bounding::{Aabb2d, IntersectsVolume};
 
 use crate::prelude::*;
 
@@ -193,7 +190,7 @@ pub fn drop_bomb(
             continue;
         }
 
-        if random::<f32>() * 100. <= 1. {
+        if random::<f32>() * 100. <= 10. {
             commands.spawn(BombBundle::new(
                 transform.translation.x,
                 transform.translation.y,
@@ -226,10 +223,8 @@ pub fn detect_bomb_hit(
 ) {
     let cannon_transform = cannon_qery.single();
 
-    let cannon_bounding_box = Aabb2d::new(
-        cannon_transform.translation.truncate(),
-        cannon_transform.scale.truncate() / 2.,
-    );
+    let cannon_bounding_box =
+        Aabb2d::new(cannon_transform.translation.truncate(), Cannon::size() / 2.);
 
     for (bomb_entity, bomb_transform) in bomb_query.iter() {
         let bomb_bounding_box = Aabb2d::new(

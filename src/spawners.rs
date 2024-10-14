@@ -1,13 +1,19 @@
-use bevy::render::texture;
-
 use crate::prelude::*;
 
 pub fn spawn_camera(mut commands: Commands) {
     commands.spawn(Camera2dBundle::default());
 }
 
-pub fn spawn_cannon(mut commands: Commands) {
-    commands.spawn(CannonBundle::new());
+pub fn spawn_cannon(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
+) {
+    let texture: Handle<Image> = asset_server.load("cannon.png");
+    let layout = TextureAtlasLayout::from_grid(UVec2::splat(32), 2, 1, None, None);
+    let texture_atlas_layout = texture_atlas_layouts.add(layout);
+
+    commands.spawn(CannonBundle::new(texture, texture_atlas_layout));
 }
 
 pub fn spawn_lifes_ui(mut commands: Commands) {

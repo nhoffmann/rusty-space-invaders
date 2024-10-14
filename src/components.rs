@@ -66,28 +66,36 @@ pub struct PlayerHitEvent;
 #[derive(Component, Clone, Copy, Debug)]
 pub struct Cannon;
 
+impl Cannon {
+    pub fn size() -> Vec2 {
+        Vec2::new(26., 16.)
+    }
+}
+
 #[derive(Bundle)]
 pub struct CannonBundle {
     marker: Cannon,
     sprite: SpriteBundle,
+    texture_atlas: TextureAtlas,
 }
 
 impl CannonBundle {
-    pub fn new() -> Self {
+    pub fn new(texture: Handle<Image>, layout: Handle<TextureAtlasLayout>) -> Self {
         Self {
             marker: Cannon,
             sprite: SpriteBundle {
+                texture,
                 sprite: Sprite {
                     color: SPRITE_COLOR,
                     ..default()
                 },
                 transform: Transform {
-                    scale: Vec3::new(SPRITE_SIZE, SPRITE_SIZE, 0.),
                     translation: Vec2::new(0., BOTTOM_WALL + SPRITE_SIZE).extend(0.),
                     ..default()
                 },
                 ..default()
             },
+            texture_atlas: TextureAtlas { layout, index: 0 },
         }
     }
 }
@@ -224,7 +232,6 @@ impl EnemyBundle {
                     ..default()
                 },
                 transform: Transform {
-                    // scale: Vec2::new(SPRITE_SIZE, SPRITE_SIZE).extend(1.),
                     translation: Vec2::new(x, y).extend(0.),
                     ..default()
                 },
