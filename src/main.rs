@@ -23,6 +23,8 @@ mod prelude {
     pub use rand::prelude::random;
 }
 
+use std::time::Duration;
+
 use prelude::*;
 
 fn main() {
@@ -35,6 +37,7 @@ fn main() {
             }),
             ..default()
         }))
+        .insert_resource(Time::<Fixed>::from_duration(Duration::from_secs(1)))
         .insert_resource(EnemyMovement::new())
         .insert_resource(Player::new())
         .add_systems(
@@ -47,21 +50,21 @@ fn main() {
                 spawn_score_ui,
             ),
         )
-        .add_systems(Update, (player_input, update_lifes_ui, update_score_ui))
         .add_systems(
-            FixedUpdate,
+            Update,
             (
+                player_input,
+                update_lifes_ui,
+                update_score_ui,
                 move_cannon,
                 fire_laser,
                 move_laser_beam,
                 detect_laser_hit,
-                move_enemies_horizontal,
-                move_enemies_vertical,
-                drop_bomb,
                 move_bomb,
                 detect_bomb_hit,
             ),
         )
+        .add_systems(FixedUpdate, (move_enemies, drop_bomb))
         .add_event::<ControllerEvent>()
         .add_event::<Fired>()
         .add_event::<CollisionEvent>()

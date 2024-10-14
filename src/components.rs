@@ -37,27 +37,20 @@ impl Player {
 pub struct EnemyMovement {
     pub direction: f32,
     pub speed: f32,
+    pub advance: bool,
 }
 
 impl EnemyMovement {
     pub fn new() -> Self {
         Self {
             direction: 1.,
-            speed: 0.4,
+            speed: SPRITE_SIZE / 4.,
+            advance: false,
         }
     }
 
-    pub fn level_up(&mut self) {
-        self.reverse_direction();
-        self.increase_speed();
-    }
-
-    fn reverse_direction(&mut self) {
+    pub fn reverse_direction(&mut self) {
         self.direction *= -1.;
-    }
-
-    fn increase_speed(&mut self) {
-        self.speed += 0.02;
     }
 }
 
@@ -160,10 +153,17 @@ impl BombBundle {
 #[derive(Component)]
 pub struct Enemy;
 
+#[derive(Component)]
+pub struct EnemyPosition {
+    pub x: u8,
+    pub y: u8,
+}
+
 #[derive(Bundle)]
 pub struct EnemyBundle {
     marker: Enemy,
     sprite: SpriteBundle,
+    pub position: EnemyPosition,
 }
 
 impl EnemyBundle {
@@ -182,6 +182,7 @@ impl EnemyBundle {
                 },
                 ..default()
             },
+            position: EnemyPosition { x: 0, y: 0 },
         }
     }
 }

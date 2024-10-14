@@ -62,34 +62,33 @@ pub fn move_cannon(
         new_cannon_position.clamp(LEFT_WALL + SPRITE_SIZE / 2., RIGHT_WALL - SPRITE_SIZE / 2.);
 }
 
-pub fn move_enemies_horizontal(
+pub fn move_enemies(
     mut enemy_query: Query<&mut Transform, With<Enemy>>,
     mut enemy_movement: ResMut<EnemyMovement>,
     mut enemy_advancement_event_writer: EventWriter<EnemyAdvancement>,
 ) {
-    enemy_query.iter_mut().for_each(|mut transform| {
-        transform.translation.x += enemy_movement.speed * enemy_movement.direction;
-
-        if transform.translation.x + SPRITE_SIZE / 2. >= RIGHT_WALL {
-            enemy_movement.level_up();
-            enemy_advancement_event_writer.send_default();
-        }
-
-        if transform.translation.x - SPRITE_SIZE / 2. < LEFT_WALL {
-            enemy_movement.level_up();
-            enemy_advancement_event_writer.send_default();
-        }
-    });
-}
-
-pub fn move_enemies_vertical(
-    mut enemy_query: Query<&mut Transform, With<Enemy>>,
-    mut enemy_advancement_event_reader: EventReader<EnemyAdvancement>,
-) {
-    for _ in enemy_advancement_event_reader.read() {
+    if enemy_movement.advance {
         enemy_query.iter_mut().for_each(|mut transform| {
             transform.translation.y -= SPRITE_SIZE;
         });
+        enemy_movement.advance = false;
+    } else {
+        let mut advance = false;
+        for mut transform in enemy_query.iter_mut() {
+            let new_x = transform.translation.x + enemy_movement.speed * enemy_movement.direction;
+
+            if new_x + SPRITE_SIZE > RIGHT_WALL || new_x - SPRITE_SIZE < LEFT_WALL {
+                advance = true;
+            }
+
+            transform.translation.x = new_x;
+        }
+
+        if advance {
+            enemy_advancement_event_writer.send_default();
+            enemy_movement.reverse_direction();
+            enemy_movement.advance = true;
+        }
     }
 }
 
@@ -158,9 +157,31 @@ pub fn detect_laser_hit(
     }
 }
 
-pub fn drop_bomb(mut commands: Commands, enemy_query: Query<&Transform, With<Enemy>>) {
-    for transform in enemy_query.iter() {
-        if random::<f32>() * 1000. <= 1. {
+pub fn drop_bomb(
+    mut commands: Commands,
+    enemy_query: Query<(&Transform, &EnemyPosition), With<Enemy>>,
+) {
+    let positions = enemy_query
+        .iter()
+        .map(|(_transform, position)| position)
+        .collect::<Vec<&EnemyPosition>>();
+
+    fn is_edge(position: &EnemyPosition, positions: &Vec<&EnemyPosition>) -> bool {
+        positions
+            .iter()
+            .filter(|grid_position| grid_position.x == position.x)
+            .map(|column_position| column_position.y)
+            .max()
+            .unwrap()
+            <= position.y
+    }
+
+    for (transform, position) in enemy_query.iter() {
+        if !is_edge(position, &positions) {
+            continue;
+        }
+
+        if random::<f32>() * 100. <= 1. {
             commands.spawn(BombBundle::new(
                 transform.translation.x,
                 transform.translation.y,
