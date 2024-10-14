@@ -1,5 +1,13 @@
 use crate::prelude::*;
 
+pub fn load_sounds(mut commands: Commands, asset_server: Res<AssetServer>) {
+    let fire_laser_sound = asset_server.load("sounds/shoot.ogg");
+    commands.insert_resource(FireLaserSound(fire_laser_sound));
+
+    let invader_killed_sound = asset_server.load("sounds/invaderkilled.ogg");
+    commands.insert_resource(InvaderKilledSound(invader_killed_sound));
+}
+
 pub fn spawn_camera(mut commands: Commands) {
     commands.spawn(Camera2dBundle::default());
 }
@@ -47,6 +55,30 @@ pub fn spawn_score_ui(mut commands: Commands) {
             ..default()
         }),
         ScoreUI,
+    ));
+}
+
+pub fn spawn_ufo(
+    mut commands: Commands,
+    time: Res<Time>,
+    mut spawn_ufo_timer_query: Query<&mut UfoSpawnTimer>,
+    asset_server: Res<AssetServer>,
+    mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
+) {
+    for mut timer in &mut spawn_ufo_timer_query {
+        if !timer.tick(time.delta()).just_finished() {
+            return;
+        }
+    }
+    let texture: Handle<Image> = asset_server.load("ufo.png");
+    let layout = TextureAtlasLayout::from_grid(UVec2::splat(32), 1, 2, None, None);
+    let texture_atlas_layout = texture_atlas_layouts.add(layout);
+
+    commands.spawn(UfoBundle::new(
+        LEFT_WALL + SPRITE_SIZE / 2.,
+        TOP_WALL - SPRITE_SIZE / 2.,
+        texture.clone(),
+        texture_atlas_layout.clone(),
     ));
 }
 

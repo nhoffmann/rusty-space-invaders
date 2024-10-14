@@ -58,7 +58,7 @@ impl EnemyMovement {
 pub struct EnemyAdvancement;
 
 #[derive(Event, Default)]
-pub struct CollisionEvent;
+pub struct HitEvent;
 
 #[derive(Event, Default)]
 pub struct PlayerHitEvent;
@@ -102,6 +102,12 @@ impl CannonBundle {
 
 #[derive(Component, Clone, Copy, Debug)]
 pub struct LaserBeam;
+
+#[derive(Resource, Deref)]
+pub struct FireLaserSound(pub Handle<AudioSource>);
+
+#[derive(Resource, Deref)]
+pub struct InvaderKilledSound(pub Handle<AudioSource>);
 
 #[derive(Bundle)]
 pub struct LaserBeamBundle {
@@ -170,7 +176,7 @@ impl BombBundle {
 #[derive(Component, Clone)]
 pub struct Enemy {
     pub sprite_file_name: String,
-    pub points: u8,
+    pub points: i32,
     pub size: Vec2,
 }
 
@@ -239,6 +245,35 @@ impl EnemyBundle {
             },
             texture_atlas: TextureAtlas { layout, index: 0 },
             position: EnemyPosition { x: 0, y: 0 },
+            hitable: Hitable,
+        }
+    }
+}
+
+#[derive(Component, Deref, DerefMut)]
+pub struct UfoSpawnTimer(pub Timer);
+
+#[derive(Component)]
+pub struct Ufo;
+
+#[derive(Bundle)]
+pub struct UfoBundle {
+    marker: Ufo,
+    sprite: SpriteBundle,
+    texture_atlas: TextureAtlas,
+    hitable: Hitable,
+}
+
+impl UfoBundle {
+    pub fn new(x: f32, y: f32, texture: Handle<Image>, layout: Handle<TextureAtlasLayout>) -> Self {
+        Self {
+            marker: Ufo,
+            sprite: SpriteBundle {
+                texture,
+                transform: Transform::from_translation(Vec2::new(x, y).extend(0.)),
+                ..default()
+            },
+            texture_atlas: TextureAtlas { layout, index: 0 },
             hitable: Hitable,
         }
     }

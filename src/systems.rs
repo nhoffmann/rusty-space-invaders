@@ -5,6 +5,7 @@ use crate::prelude::*;
 const LASER_SPEED: f32 = 8.;
 const CANNON_SPEED: f32 = 3.;
 const BOMB_SPEED: f32 = 1.;
+const UFO_SPEED: f32 = 1.;
 
 #[derive(Clone, Copy, Debug)]
 pub enum ControllerDirection {
@@ -97,15 +98,22 @@ pub fn fire_laser(
     mut fired_event_reader: EventReader<Fired>,
     cannon_query: Query<&Transform, With<Cannon>>,
     laser_beam_query: Query<&LaserBeam>,
+    sound: Res<FireLaserSound>,
 ) {
     // only one laser beam at the time
-    if laser_beam_query.iter().collect::<Vec<&LaserBeam>>().len() > 0 {
+    if !laser_beam_query.is_empty() {
         return;
     }
 
     let cannon_transform = cannon_query.single();
 
-    for _ in fired_event_reader.read() {
+    if !fired_event_reader.is_empty() {
+        fired_event_reader.clear();
+        commands.spawn(AudioBundle {
+            source: sound.clone(),
+            settings: PlaybackSettings::DESPAWN,
+        });
+
         commands.spawn(LaserBeamBundle::new(
             cannon_transform.translation.x,
             cannon_transform.translation.y,
@@ -131,7 +139,7 @@ pub fn detect_laser_hit(
     mut player: ResMut<Player>,
     laser_beam_query: Query<(Entity, &Transform), With<LaserBeam>>,
     hitable_query: Query<(Entity, &Transform, Option<&Enemy>, Option<&Bomb>), With<Hitable>>,
-    mut collision_event_writer: EventWriter<CollisionEvent>,
+    mut hit_event_writer: EventWriter<HitEvent>,
 ) {
     if let Ok((laser_beam_entity, laser_beam_transform)) = laser_beam_query.get_single() {
         let laser_beam_bounding_box: Aabb2d = Aabb2d::new(
@@ -145,7 +153,7 @@ pub fn detect_laser_hit(
 
             if maybe_enemy.is_some() {
                 let enemy = maybe_enemy.unwrap();
-                points = enemy.points as i32;
+                points = enemy.points;
                 size = enemy.size;
             }
             if maybe_bomb.is_some() {
@@ -156,13 +164,27 @@ pub fn detect_laser_hit(
             let bounding_box: Aabb2d = Aabb2d::new(transform.translation.truncate(), size / 2.);
 
             if bounding_box.intersects(&laser_beam_bounding_box) {
-                collision_event_writer.send_default();
+                hit_event_writer.send_default();
                 player.add_to_score(points);
 
                 commands.entity(laser_beam_entity).despawn();
                 commands.entity(entity).despawn();
             }
         }
+    }
+}
+
+pub fn play_enemy_hit_sound(
+    mut commands: Commands,
+    mut hit_event_reader: EventReader<HitEvent>,
+    sound: Res<InvaderKilledSound>,
+) {
+    if !hit_event_reader.is_empty() {
+        hit_event_reader.clear();
+        commands.spawn(AudioBundle {
+            source: sound.clone(),
+            settings: PlaybackSettings::DESPAWN,
+        });
     }
 }
 
@@ -250,4 +272,20 @@ pub fn update_lifes_ui(player: Res<Player>, mut lifes_ui_query: Query<&mut Text,
 pub fn update_score_ui(player: Res<Player>, mut score_ui_query: Query<&mut Text, With<ScoreUI>>) {
     let mut text = score_ui_query.single_mut();
     text.sections[0].value = player.score();
+}
+
+pub fn setup_ufo_timer(mut commands: Commands) {
+    commands.spawn(UfoSpawnTimer(Timer::from_seconds(
+        25.,
+        TimerMode::Repeating,
+    )));
+}
+
+pub fn move_ufo(mut ufo_query: Query<&mut Transform, With<Ufo>>) {
+    if ufo_query.is_empty() {
+        return;
+    }
+
+    let mut ufo_transform = ufo_query.single_mut();
+    ufo_transform.translation.x += UFO_SPEED;
 }

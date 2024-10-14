@@ -43,11 +43,13 @@ fn main() {
         .add_systems(
             Startup,
             (
+                load_sounds,
                 spawn_camera,
                 spawn_cannon,
                 spawn_enemies,
                 spawn_lifes_ui,
                 spawn_score_ui,
+                setup_ufo_timer,
             ),
         )
         .add_systems(
@@ -62,12 +64,14 @@ fn main() {
                 detect_laser_hit,
                 move_bomb,
                 detect_bomb_hit,
+                play_enemy_hit_sound,
+                move_ufo,
             ),
         )
-        .add_systems(FixedUpdate, (move_enemies, drop_bomb))
+        .add_systems(FixedUpdate, (move_enemies, drop_bomb, spawn_ufo))
         .add_event::<ControllerEvent>()
         .add_event::<Fired>()
-        .add_event::<CollisionEvent>()
+        .add_event::<HitEvent>()
         .add_event::<EnemyAdvancement>()
         .add_event::<PlayerHitEvent>()
         .run();
