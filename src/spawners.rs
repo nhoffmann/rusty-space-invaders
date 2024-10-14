@@ -64,6 +64,7 @@ pub fn spawn_ufo(
     mut spawn_ufo_timer_query: Query<&mut UfoSpawnTimer>,
     asset_server: Res<AssetServer>,
     mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
+    enemy_movement: Res<EnemyMovement>,
 ) {
     for mut timer in &mut spawn_ufo_timer_query {
         if !timer.tick(time.delta()).just_finished() {
@@ -74,8 +75,13 @@ pub fn spawn_ufo(
     let layout = TextureAtlasLayout::from_grid(UVec2::splat(32), 1, 2, None, None);
     let texture_atlas_layout = texture_atlas_layouts.add(layout);
 
+    let start_x: f32 = match enemy_movement.direction > 0. {
+        true => LEFT_WALL + SPRITE_SIZE / 2.,
+        false => RIGHT_WALL - SPRITE_SIZE / 2.,
+    };
+
     commands.spawn(UfoBundle::new(
-        LEFT_WALL + SPRITE_SIZE / 2.,
+        start_x,
         TOP_WALL - SPRITE_SIZE / 2.,
         texture.clone(),
         texture_atlas_layout.clone(),

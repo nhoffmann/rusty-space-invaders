@@ -276,16 +276,26 @@ pub fn update_score_ui(player: Res<Player>, mut score_ui_query: Query<&mut Text,
 
 pub fn setup_ufo_timer(mut commands: Commands) {
     commands.spawn(UfoSpawnTimer(Timer::from_seconds(
-        25.,
+        10.,
         TimerMode::Repeating,
     )));
 }
 
-pub fn move_ufo(mut ufo_query: Query<&mut Transform, With<Ufo>>) {
+pub fn move_ufo(
+    mut commands: Commands,
+    mut ufo_query: Query<(Entity, &mut Transform), With<Ufo>>,
+    enemy_movement: Res<EnemyMovement>,
+) {
     if ufo_query.is_empty() {
         return;
     }
 
-    let mut ufo_transform = ufo_query.single_mut();
-    ufo_transform.translation.x += UFO_SPEED;
+    let (entity, mut ufo_transform) = ufo_query.single_mut();
+    ufo_transform.translation.x += UFO_SPEED * enemy_movement.direction;
+
+    if ufo_transform.translation.x > RIGHT_WALL + SPRITE_SIZE
+        || ufo_transform.translation.x < LEFT_WALL - SPRITE_SIZE
+    {
+        commands.entity(entity).despawn();
+    }
 }
