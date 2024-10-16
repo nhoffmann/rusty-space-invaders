@@ -1,13 +1,5 @@
 use crate::prelude::*;
 
-pub fn load_sounds(mut commands: Commands, asset_server: Res<AssetServer>) {
-    let fire_laser_sound = asset_server.load("sounds/shoot.ogg");
-    commands.insert_resource(FireLaserSound(fire_laser_sound));
-
-    let invader_killed_sound = asset_server.load("sounds/invaderkilled.ogg");
-    commands.insert_resource(InvaderKilledSound(invader_killed_sound));
-}
-
 pub fn spawn_camera(mut commands: Commands) {
     commands.spawn(Camera2dBundle::default());
 }

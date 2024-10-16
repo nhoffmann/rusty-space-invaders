@@ -1,4 +1,5 @@
 mod components;
+mod sounds;
 mod spawners;
 mod systems;
 
@@ -17,6 +18,7 @@ mod prelude {
     pub const SPRITE_SIZE: f32 = 32.;
 
     pub use crate::components::*;
+    pub use crate::sounds::*;
     pub use crate::spawners::*;
     pub use crate::systems::*;
     pub use bevy::prelude::*;
@@ -37,6 +39,7 @@ fn main() {
             }),
             ..default()
         }))
+        // TODO should be a timer, see below
         .insert_resource(Time::<Fixed>::from_duration(Duration::from_secs(1)))
         .insert_resource(EnemyMovement::new())
         .insert_resource(Player::new())
@@ -56,19 +59,23 @@ fn main() {
             Update,
             (
                 player_input,
-                update_lifes_ui,
-                update_score_ui,
-                move_cannon,
-                fire_laser,
+                move_cannon.after(player_input),
+                fire_laser.after(player_input),
                 move_laser_beam,
-                detect_laser_hit,
-                move_bomb,
-                detect_bomb_hit,
-                play_enemy_hit_sound,
                 move_ufo,
+                move_bomb,
+                detect_laser_hit,
+                detect_bomb_hit,
+                play_enemy_hit_sound.after(detect_laser_hit),
+                update_score_ui.after(detect_laser_hit),
+                update_lifes_ui.after(detect_bomb_hit),
             ),
         )
-        .add_systems(FixedUpdate, (move_enemies, drop_bomb, spawn_ufo))
+        // TODO: do this in a timer, so we can control the interval, i.e. shorten it when time progresses
+        .add_systems(
+            FixedUpdate,
+            (move_enemies, drop_bomb, play_invader_sound, spawn_ufo),
+        )
         .add_event::<ControllerEvent>()
         .add_event::<Fired>()
         .add_event::<HitEvent>()

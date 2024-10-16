@@ -103,12 +103,6 @@ impl CannonBundle {
 #[derive(Component, Clone, Copy, Debug)]
 pub struct LaserBeam;
 
-#[derive(Resource, Deref)]
-pub struct FireLaserSound(pub Handle<AudioSource>);
-
-#[derive(Resource, Deref)]
-pub struct InvaderKilledSound(pub Handle<AudioSource>);
-
 #[derive(Bundle)]
 pub struct LaserBeamBundle {
     marker: LaserBeam,
