@@ -66,17 +66,12 @@ pub struct PlayerHitEvent;
 #[derive(Component, Clone, Copy, Debug)]
 pub struct Cannon;
 
-impl Cannon {
-    pub fn size() -> Vec2 {
-        Vec2::new(26., 16.)
-    }
-}
-
 #[derive(Bundle)]
 pub struct CannonBundle {
     marker: Cannon,
     sprite: SpriteBundle,
     texture_atlas: TextureAtlas,
+    size: Size,
 }
 
 impl CannonBundle {
@@ -96,6 +91,10 @@ impl CannonBundle {
                 ..default()
             },
             texture_atlas: TextureAtlas { layout, index: 0 },
+            size: Size {
+                width: 26.,
+                height: 16.,
+            },
         }
     }
 }
@@ -107,6 +106,7 @@ pub struct LaserBeam;
 pub struct LaserBeamBundle {
     marker: LaserBeam,
     sprite: SpriteBundle,
+    size: Size,
 }
 
 impl LaserBeamBundle {
@@ -125,6 +125,10 @@ impl LaserBeamBundle {
                 },
                 ..default()
             },
+            size: Size {
+                width: 1.,
+                height: 10.,
+            },
         }
     }
 }
@@ -133,23 +137,26 @@ impl LaserBeamBundle {
 pub struct Hitable;
 
 #[derive(Component)]
-pub struct Bomb {
-    pub size: Vec2,
-}
+pub struct Bomb;
 
 #[derive(Bundle)]
 pub struct BombBundle {
     marker: Bomb,
     sprite: SpriteBundle,
     hitable: Hitable,
+    size: Size,
+}
+
+#[derive(Component)]
+pub struct Size {
+    pub width: f32,
+    pub height: f32,
 }
 
 impl BombBundle {
     pub fn new(x: f32, y: f32) -> Self {
         Self {
-            marker: Bomb {
-                size: Vec2::new(10., 30.),
-            },
+            marker: Bomb,
             sprite: SpriteBundle {
                 sprite: Sprite {
                     color: SPRITE_COLOR,
@@ -163,6 +170,10 @@ impl BombBundle {
                 ..default()
             },
             hitable: Hitable,
+            size: Size {
+                width: 10.,
+                height: 30.,
+            },
         }
     }
 }
@@ -171,7 +182,8 @@ impl BombBundle {
 pub struct Enemy {
     pub sprite_file_name: String,
     pub points: i32,
-    pub size: Vec2,
+    width: f32,
+    height: f32,
 }
 
 impl Enemy {
@@ -179,7 +191,8 @@ impl Enemy {
         Enemy {
             sprite_file_name: "squid.png".into(),
             points: 30,
-            size: Vec2::new(16., 16.),
+            width: 16.,
+            height: 16.,
         }
     }
 
@@ -187,7 +200,8 @@ impl Enemy {
         Enemy {
             sprite_file_name: "crab.png".into(),
             points: 20,
-            size: Vec2::new(11., 16.),
+            width: 11.,
+            height: 16.,
         }
     }
 
@@ -195,7 +209,8 @@ impl Enemy {
         Enemy {
             sprite_file_name: "octopus.png".into(),
             points: 10,
-            size: Vec2::new(24., 16.),
+            width: 24.,
+            height: 16.,
         }
     }
 }
@@ -213,6 +228,7 @@ pub struct EnemyBundle {
     texture_atlas: TextureAtlas,
     pub position: EnemyPosition,
     hitable: Hitable,
+    size: Size,
 }
 
 impl EnemyBundle {
@@ -224,7 +240,7 @@ impl EnemyBundle {
         layout: Handle<TextureAtlasLayout>,
     ) -> Self {
         Self {
-            marker: enemy,
+            marker: enemy.clone(),
             sprite: SpriteBundle {
                 texture,
                 sprite: Sprite {
@@ -240,6 +256,10 @@ impl EnemyBundle {
             texture_atlas: TextureAtlas { layout, index: 0 },
             position: EnemyPosition { x: 0, y: 0 },
             hitable: Hitable,
+            size: Size {
+                width: enemy.width,
+                height: enemy.height,
+            },
         }
     }
 }

@@ -137,31 +137,30 @@ pub fn move_laser_beam(
 pub fn detect_laser_hit(
     mut commands: Commands,
     mut player: ResMut<Player>,
-    laser_beam_query: Query<(Entity, &Transform), With<LaserBeam>>,
-    hitable_query: Query<(Entity, &Transform, Option<&Enemy>, Option<&Bomb>), With<Hitable>>,
+    laser_beam_query: Query<(Entity, &Transform, &Size), With<LaserBeam>>,
+    hitable_query: Query<(Entity, &Transform, Option<&Enemy>, &Size), With<Hitable>>,
     mut hit_event_writer: EventWriter<HitEvent>,
 ) {
-    if let Ok((laser_beam_entity, laser_beam_transform)) = laser_beam_query.get_single() {
+    if let Ok((laser_beam_entity, laser_beam_transform, laser_beam_size)) =
+        laser_beam_query.get_single()
+    {
         let laser_beam_bounding_box: Aabb2d = Aabb2d::new(
             laser_beam_transform.translation.truncate(),
-            laser_beam_transform.scale.truncate() / 2.,
+            Vec2::new(laser_beam_size.width, laser_beam_size.height) / 2.,
         );
 
-        for (entity, transform, maybe_enemy, maybe_bomb) in hitable_query.iter() {
-            let mut size: Vec2 = Vec2::ZERO;
+        for (entity, transform, maybe_enemy, hitable_size) in hitable_query.iter() {
             let mut points: i32 = 0;
 
             if maybe_enemy.is_some() {
                 let enemy = maybe_enemy.unwrap();
                 points = enemy.points;
-                size = enemy.size;
-            }
-            if maybe_bomb.is_some() {
-                let bomb = maybe_bomb.unwrap();
-                size = bomb.size;
             }
 
-            let bounding_box: Aabb2d = Aabb2d::new(transform.translation.truncate(), size / 2.);
+            let bounding_box: Aabb2d = Aabb2d::new(
+                transform.translation.truncate(),
+                Vec2::new(hitable_size.width, hitable_size.height) / 2.,
+            );
 
             if bounding_box.intersects(&laser_beam_bounding_box) {
                 hit_event_writer.send_default();
@@ -239,14 +238,16 @@ pub fn move_bomb(
 pub fn detect_bomb_hit(
     mut commands: Commands,
     bomb_query: Query<(Entity, &Transform), With<Bomb>>,
-    cannon_qery: Query<&Transform, With<Cannon>>,
+    cannon_qery: Query<(&Transform, &Size), With<Cannon>>,
     mut player_hit_event_writer: EventWriter<PlayerHitEvent>,
     mut player: ResMut<Player>,
 ) {
-    let cannon_transform = cannon_qery.single();
+    let (cannon_transform, size) = cannon_qery.single();
 
-    let cannon_bounding_box =
-        Aabb2d::new(cannon_transform.translation.truncate(), Cannon::size() / 2.);
+    let cannon_bounding_box = Aabb2d::new(
+        cannon_transform.translation.truncate(),
+        Vec2::new(size.width, size.height) / 2.,
+    );
 
     for (bomb_entity, bomb_transform) in bomb_query.iter() {
         let bomb_bounding_box = Aabb2d::new(
