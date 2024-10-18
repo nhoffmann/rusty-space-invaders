@@ -6,6 +6,7 @@ const LASER_SPEED: f32 = 8.;
 const CANNON_SPEED: f32 = 3.;
 const BOMB_SPEED: f32 = 1.;
 const UFO_SPEED: f32 = 1.;
+const DIFFICULTY_DELTA: i32 = 7;
 
 #[derive(Clone, Copy, Debug)]
 pub enum ControllerDirection {
@@ -90,6 +91,21 @@ pub fn move_enemies(
             enemy_movement.reverse_direction();
             enemy_movement.advance = true;
         }
+    }
+}
+
+pub fn increase_difficulty(
+    mut commands: Commands,
+    mut difficulty: ResMut<Difficulty>,
+    mut enemy_advancement_event_reader: EventReader<EnemyAdvancement>,
+) {
+    if !enemy_advancement_event_reader.is_empty() {
+        enemy_advancement_event_reader.clear();
+        difficulty.0 -= DIFFICULTY_DELTA;
+
+        commands.insert_resource(Time::<Fixed>::from_duration(Duration::from_millis(
+            (difficulty.0 * 10) as u64,
+        )));
     }
 }
 

@@ -327,3 +327,12 @@ pub struct LifesUI;
 
 #[derive(Component)]
 pub struct ScoreUI;
+
+#[derive(Resource, Debug)]
+pub struct Difficulty(pub i32);
+
+impl Default for Difficulty {
+    fn default() -> Self {
+        Self(100)
+    }
+}

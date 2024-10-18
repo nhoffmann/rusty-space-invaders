@@ -24,13 +24,13 @@ mod prelude {
     pub use bevy::prelude::*;
     pub use rand::prelude::random;
     pub use rand::prelude::thread_rng;
+    pub use std::time::Duration;
 }
-
-use std::time::Duration;
 
 use prelude::*;
 
 fn main() {
+    let initial_difficulty = Difficulty::default();
     App::new()
         .add_plugins(DefaultPlugins.set(WindowPlugin {
             primary_window: Some(Window {
@@ -41,7 +41,10 @@ fn main() {
             ..default()
         }))
         // TODO should be a timer, see below
-        .insert_resource(Time::<Fixed>::from_duration(Duration::from_secs(1)))
+        .insert_resource(Time::<Fixed>::from_duration(Duration::from_millis(
+            (initial_difficulty.0 * 10) as u64,
+        )))
+        .insert_resource(initial_difficulty)
         .insert_resource(EnemyMovement::new())
         .insert_resource(Player::new())
         .add_systems(
@@ -75,7 +78,13 @@ fn main() {
         // TODO: do this in a timer, so we can control the interval, i.e. shorten it when time progresses
         .add_systems(
             FixedUpdate,
-            (move_enemies, drop_bomb, play_invader_sound, spawn_ufo),
+            (
+                move_enemies,
+                drop_bomb,
+                play_invader_sound,
+                spawn_ufo,
+                increase_difficulty.after(move_enemies),
+            ),
         )
         .add_event::<ControllerEvent>()
         .add_event::<Fired>()
