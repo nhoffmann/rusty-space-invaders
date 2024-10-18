@@ -77,6 +77,7 @@ pub fn spawn_ufo(
         TOP_WALL - SPRITE_SIZE / 2.,
         texture.clone(),
         texture_atlas_layout.clone(),
+        enemy_movement.direction,
     ));
 }
 

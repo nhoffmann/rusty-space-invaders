@@ -23,6 +23,7 @@ mod prelude {
     pub use crate::systems::*;
     pub use bevy::prelude::*;
     pub use rand::prelude::random;
+    pub use rand::prelude::thread_rng;
 }
 
 use std::time::Duration;

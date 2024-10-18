@@ -1,3 +1,5 @@
+use rand::Rng;
+
 use crate::prelude::*;
 
 #[derive(Resource)]
@@ -181,7 +183,7 @@ impl BombBundle {
 #[derive(Component, Clone)]
 pub struct Enemy {
     pub sprite_file_name: String,
-    pub points: i32,
+    points: i32,
     width: f32,
     height: f32,
 }
@@ -221,6 +223,9 @@ pub struct EnemyPosition {
     pub y: u8,
 }
 
+#[derive(Component)]
+pub struct Hitpoints(pub i32);
+
 #[derive(Bundle)]
 pub struct EnemyBundle {
     marker: Enemy,
@@ -229,6 +234,7 @@ pub struct EnemyBundle {
     pub position: EnemyPosition,
     hitable: Hitable,
     size: Size,
+    hitpoints: Hitpoints,
 }
 
 impl EnemyBundle {
@@ -260,6 +266,7 @@ impl EnemyBundle {
                 width: enemy.width,
                 height: enemy.height,
             },
+            hitpoints: Hitpoints(enemy.points),
         }
     }
 }
@@ -270,16 +277,32 @@ pub struct UfoSpawnTimer(pub Timer);
 #[derive(Component)]
 pub struct Ufo;
 
+#[derive(Component)]
+pub struct UfoDirection(pub f32);
+
 #[derive(Bundle)]
 pub struct UfoBundle {
     marker: Ufo,
     sprite: SpriteBundle,
     texture_atlas: TextureAtlas,
     hitable: Hitable,
+    direction: UfoDirection,
+    size: Size,
+    hitpoints: Hitpoints,
 }
 
 impl UfoBundle {
-    pub fn new(x: f32, y: f32, texture: Handle<Image>, layout: Handle<TextureAtlasLayout>) -> Self {
+    pub fn new(
+        x: f32,
+        y: f32,
+        texture: Handle<Image>,
+        layout: Handle<TextureAtlasLayout>,
+        direction: f32,
+    ) -> Self {
+        let possible_hitpoints = [50, 100, 150, 200, 300];
+        let hp_index = thread_rng().gen_range(0..5);
+        let hitpoints = Hitpoints(possible_hitpoints[hp_index]);
+
         Self {
             marker: Ufo,
             sprite: SpriteBundle {
@@ -289,6 +312,12 @@ impl UfoBundle {
             },
             texture_atlas: TextureAtlas { layout, index: 0 },
             hitable: Hitable,
+            direction: UfoDirection(direction),
+            size: Size {
+                width: 32.,
+                height: 14.,
+            },
+            hitpoints,
         }
     }
 }

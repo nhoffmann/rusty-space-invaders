@@ -138,7 +138,7 @@ pub fn detect_laser_hit(
     mut commands: Commands,
     mut player: ResMut<Player>,
     laser_beam_query: Query<(Entity, &Transform, &Size), With<LaserBeam>>,
-    hitable_query: Query<(Entity, &Transform, Option<&Enemy>, &Size), With<Hitable>>,
+    hitable_query: Query<(Entity, &Transform, &Size, Option<&Hitpoints>), With<Hitable>>,
     mut hit_event_writer: EventWriter<HitEvent>,
 ) {
     if let Ok((laser_beam_entity, laser_beam_transform, laser_beam_size)) =
@@ -149,12 +149,11 @@ pub fn detect_laser_hit(
             Vec2::new(laser_beam_size.width, laser_beam_size.height) / 2.,
         );
 
-        for (entity, transform, maybe_enemy, hitable_size) in hitable_query.iter() {
+        for (entity, transform, hitable_size, maybe_hitpoints) in hitable_query.iter() {
             let mut points: i32 = 0;
 
-            if maybe_enemy.is_some() {
-                let enemy = maybe_enemy.unwrap();
-                points = enemy.points;
+            if let Some(hitpoints) = maybe_hitpoints {
+                points = hitpoints.0;
             }
 
             let bounding_box: Aabb2d = Aabb2d::new(
@@ -284,15 +283,14 @@ pub fn setup_ufo_timer(mut commands: Commands) {
 
 pub fn move_ufo(
     mut commands: Commands,
-    mut ufo_query: Query<(Entity, &mut Transform), With<Ufo>>,
-    enemy_movement: Res<EnemyMovement>,
+    mut ufo_query: Query<(Entity, &mut Transform, &UfoDirection), With<Ufo>>,
 ) {
     if ufo_query.is_empty() {
         return;
     }
 
-    let (entity, mut ufo_transform) = ufo_query.single_mut();
-    ufo_transform.translation.x += UFO_SPEED * enemy_movement.direction;
+    let (entity, mut ufo_transform, direction) = ufo_query.single_mut();
+    ufo_transform.translation.x += UFO_SPEED * direction.0;
 
     if ufo_transform.translation.x > RIGHT_WALL + SPRITE_SIZE
         || ufo_transform.translation.x < LEFT_WALL - SPRITE_SIZE
