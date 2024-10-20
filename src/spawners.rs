@@ -4,7 +4,11 @@ pub fn spawn_camera(mut commands: Commands) {
     commands.spawn(Camera2dBundle::default());
 }
 
-pub fn setup(mut commands: Commands) {
+pub fn setup_player(mut commands: Commands) {
+    commands.insert_resource(Player::new());
+}
+
+pub fn reset(mut commands: Commands) {
     let difficulty = Difficulty::default();
     commands.insert_resource(Time::<Fixed>::from_duration(Duration::from_millis(
         (difficulty.0 * 10) as u64,
@@ -12,7 +16,6 @@ pub fn setup(mut commands: Commands) {
     commands.insert_resource(difficulty);
 
     commands.insert_resource(EnemyMovement::new());
-    commands.insert_resource(Player::new());
 }
 
 pub fn spawn_cannon(
@@ -133,19 +136,23 @@ pub fn spawn_enemies(
 
 pub fn despawn_game(
     mut commands: Commands,
+    cannon_query: Query<Entity, With<Cannon>>,
     enemies_query: Query<Entity, With<Enemy>>,
     score_ui_query: Query<Entity, With<ScoreUI>>,
     lifes_ui_query: Query<Entity, With<LifesUI>>,
 ) {
+    cannon_query
+        .iter()
+        .for_each(|entity| commands.entity(entity).despawn_recursive());
     enemies_query
         .iter()
-        .for_each(|enemy| commands.entity(enemy).despawn_recursive());
+        .for_each(|entity| commands.entity(entity).despawn_recursive());
     score_ui_query
         .iter()
-        .for_each(|enemy| commands.entity(enemy).despawn_recursive());
+        .for_each(|entity| commands.entity(entity).despawn_recursive());
     lifes_ui_query
         .iter()
-        .for_each(|enemy| commands.entity(enemy).despawn_recursive());
+        .for_each(|entity| commands.entity(entity).despawn_recursive());
 }
 
 const TEXT_COLOR: Color = Color::srgb(0.9, 0.9, 0.9);
@@ -215,8 +222,16 @@ pub fn spawn_menu(mut commands: Commands) {
         });
 }
 
-pub fn despawn_menu(mut commands: Commands, menu_query: Query<Entity, With<Menu>>) {
+pub fn despawn_menu(
+    mut commands: Commands,
+    menu_query: Query<Entity, With<Menu>>,
+    game_over_sign_query: Query<Entity, With<GameOverSign>>,
+) {
     if let Ok(menu) = menu_query.get_single() {
         commands.entity(menu).despawn_recursive();
+    }
+
+    if let Ok(game_over_sign) = game_over_sign_query.get_single() {
+        commands.entity(game_over_sign).despawn_recursive();
     }
 }

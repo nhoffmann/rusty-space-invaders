@@ -331,20 +331,23 @@ pub fn check_game_over(
 
     if lifes_left == 0 || enemies_landed {
         info!("GAME OVER");
-        commands.spawn((TextBundle::from_section(
-            "GAME OVER",
-            TextStyle {
-                font_size: TEXT_SIZE,
-                color: TEXT_COLOR,
+        commands.spawn((
+            TextBundle::from_section(
+                "GAME OVER",
+                TextStyle {
+                    font_size: TEXT_SIZE,
+                    color: TEXT_COLOR,
+                    ..default()
+                },
+            )
+            .with_style(Style {
+                position_type: PositionType::Relative,
+                top: Val::Px(100.),
+                left: Val::Px(100.),
                 ..default()
-            },
-        )
-        .with_style(Style {
-            position_type: PositionType::Relative,
-            top: Val::Px(100.),
-            left: Val::Px(100.),
-            ..default()
-        }),));
+            }),
+            GameOverSign,
+        ));
 
         commands.insert_resource(Time::<Fixed>::from_duration(Duration::from_secs(1000)));
         if let Ok(cannon) = cannons.get_single() {
@@ -352,6 +355,20 @@ pub fn check_game_over(
         }
         next_state.set(GameState::GameOver);
     }
+}
+
+pub fn check_level_complete(
+    enemies: Query<Entity, With<Enemy>>,
+    mut next_state: ResMut<NextState<GameState>>,
+) {
+    if enemies.is_empty() {
+        info!("Level complete");
+        next_state.set(GameState::LevelComplete);
+    }
+}
+
+pub fn start_next_level(mut next_state: ResMut<NextState<GameState>>) {
+    next_state.set(GameState::Playing);
 }
 
 pub fn handle_menu_buttons(

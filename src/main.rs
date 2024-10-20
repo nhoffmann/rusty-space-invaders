@@ -34,11 +34,11 @@ enum GameState {
     #[default]
     Menu,
     Playing,
+    LevelComplete,
     GameOver,
 }
 
 fn main() {
-    let initial_difficulty = Difficulty::default();
     App::new()
         .add_plugins(DefaultPlugins.set(WindowPlugin {
             primary_window: Some(Window {
@@ -52,13 +52,20 @@ fn main() {
         // Systems
         .add_systems(Startup, ((load_sounds, spawn_camera),))
         .add_systems(OnEnter(GameState::Menu), spawn_menu)
-        .add_systems(OnExit(GameState::Menu), despawn_menu)
+        .add_systems(OnExit(GameState::Menu), (despawn_menu, setup_player))
+        .add_systems(
+            OnEnter(GameState::LevelComplete),
+            (despawn_game, start_next_level),
+        )
         .add_systems(OnEnter(GameState::GameOver), spawn_menu)
-        .add_systems(OnExit(GameState::GameOver), (despawn_menu, despawn_game))
+        .add_systems(
+            OnExit(GameState::GameOver),
+            (despawn_menu, despawn_game, setup_player),
+        )
         .add_systems(
             OnEnter(GameState::Playing),
             (
-                setup,
+                reset,
                 spawn_cannon,
                 spawn_enemies,
                 spawn_lifes_ui,
@@ -81,6 +88,7 @@ fn main() {
                 update_score_ui.after(detect_laser_hit),
                 update_lifes_ui.after(detect_bomb_hit),
                 check_game_over,
+                check_level_complete,
             )
                 .run_if(in_state(GameState::Playing)),
         )

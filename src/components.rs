@@ -335,3 +335,6 @@ impl Default for Difficulty {
 
 #[derive(Component, Debug)]
 pub struct Menu;
+
+#[derive(Component, Debug)]
+pub struct GameOverSign;
