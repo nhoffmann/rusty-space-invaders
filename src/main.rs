@@ -29,6 +29,14 @@ mod prelude {
 
 use prelude::*;
 
+#[derive(States, Default, Debug, Clone, PartialEq, Eq, Hash)]
+enum GameState {
+    #[default]
+    Menu,
+    Playing,
+    GameOver,
+}
+
 fn main() {
     let initial_difficulty = Difficulty::default();
     App::new()
@@ -40,18 +48,17 @@ fn main() {
             }),
             ..default()
         }))
-        // TODO should be a timer, see below
-        .insert_resource(Time::<Fixed>::from_duration(Duration::from_millis(
-            (initial_difficulty.0 * 10) as u64,
-        )))
-        .insert_resource(initial_difficulty)
-        .insert_resource(EnemyMovement::new())
-        .insert_resource(Player::new())
+        .init_state::<GameState>()
+        // Systems
+        .add_systems(Startup, ((load_sounds, spawn_camera),))
+        .add_systems(OnEnter(GameState::Menu), spawn_menu)
+        .add_systems(OnExit(GameState::Menu), despawn_menu)
+        .add_systems(OnEnter(GameState::GameOver), spawn_menu)
+        .add_systems(OnExit(GameState::GameOver), (despawn_menu, despawn_game))
         .add_systems(
-            Startup,
+            OnEnter(GameState::Playing),
             (
-                load_sounds,
-                spawn_camera,
+                setup,
                 spawn_cannon,
                 spawn_enemies,
                 spawn_lifes_ui,
@@ -73,9 +80,18 @@ fn main() {
                 play_enemy_hit_sound.after(detect_laser_hit),
                 update_score_ui.after(detect_laser_hit),
                 update_lifes_ui.after(detect_bomb_hit),
-            ),
+                check_game_over,
+            )
+                .run_if(in_state(GameState::Playing)),
         )
-        // TODO: do this in a timer, so we can control the interval, i.e. shorten it when time progresses
+        .add_systems(
+            Update,
+            (handle_menu_buttons).run_if(in_state(GameState::Menu)),
+        )
+        .add_systems(
+            Update,
+            (handle_menu_buttons).run_if(in_state(GameState::GameOver)),
+        )
         .add_systems(
             FixedUpdate,
             (
@@ -84,8 +100,10 @@ fn main() {
                 play_invader_sound,
                 spawn_ufo,
                 increase_difficulty.after(move_enemies),
-            ),
+            )
+                .run_if(in_state(GameState::Playing)),
         )
+        // Events
         .add_event::<ControllerEvent>()
         .add_event::<Fired>()
         .add_event::<HitEvent>()

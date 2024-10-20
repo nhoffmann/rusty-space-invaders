@@ -4,6 +4,17 @@ pub fn spawn_camera(mut commands: Commands) {
     commands.spawn(Camera2dBundle::default());
 }
 
+pub fn setup(mut commands: Commands) {
+    let difficulty = Difficulty::default();
+    commands.insert_resource(Time::<Fixed>::from_duration(Duration::from_millis(
+        (difficulty.0 * 10) as u64,
+    )));
+    commands.insert_resource(difficulty);
+
+    commands.insert_resource(EnemyMovement::new());
+    commands.insert_resource(Player::new());
+}
+
 pub fn spawn_cannon(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
@@ -117,5 +128,95 @@ pub fn spawn_enemies(
 
         // switch to next line
         y -= SPRITE_SIZE + 1.;
+    }
+}
+
+pub fn despawn_game(
+    mut commands: Commands,
+    enemies_query: Query<Entity, With<Enemy>>,
+    score_ui_query: Query<Entity, With<ScoreUI>>,
+    lifes_ui_query: Query<Entity, With<LifesUI>>,
+) {
+    enemies_query
+        .iter()
+        .for_each(|enemy| commands.entity(enemy).despawn_recursive());
+    score_ui_query
+        .iter()
+        .for_each(|enemy| commands.entity(enemy).despawn_recursive());
+    lifes_ui_query
+        .iter()
+        .for_each(|enemy| commands.entity(enemy).despawn_recursive());
+}
+
+const TEXT_COLOR: Color = Color::srgb(0.9, 0.9, 0.9);
+
+#[derive(Component, Clone, Copy, PartialEq, Eq)]
+pub enum ButtonAction {
+    StartGame,
+}
+
+pub fn spawn_menu(mut commands: Commands) {
+    let button_style = Style {
+        width: Val::Px(300.0),
+        height: Val::Px(65.0),
+        margin: UiRect::all(Val::Px(20.0)),
+        justify_content: JustifyContent::Center,
+        align_items: AlignItems::Center,
+        ..default()
+    };
+    let button_text_style = TextStyle {
+        font_size: 40.0,
+        color: TEXT_COLOR,
+        ..default()
+    };
+
+    commands
+        .spawn((
+            NodeBundle {
+                style: Style {
+                    width: Val::Percent(100.0),
+                    height: Val::Percent(100.0),
+                    align_items: AlignItems::Center,
+                    justify_content: JustifyContent::Center,
+                    ..default()
+                },
+                ..default()
+            },
+            Menu,
+        ))
+        .with_children(|parent| {
+            parent
+                .spawn(NodeBundle {
+                    style: Style {
+                        flex_direction: FlexDirection::Column,
+                        justify_content: JustifyContent::Center,
+                        align_items: AlignItems::Center,
+                        padding: UiRect::all(Val::Px(10.)),
+                        ..default()
+                    },
+                    ..default()
+                })
+                .with_children(|parent| {
+                    parent
+                        .spawn((
+                            ButtonBundle {
+                                style: button_style.clone(),
+                                ..default()
+                            },
+                            ButtonAction::StartGame,
+                        ))
+                        .with_children(|parent| {
+                            parent.spawn(TextBundle::from_section(
+                                "Start Game",
+                                button_text_style.clone(),
+                            ));
+                        });
+                });
+        });
+}
+
+pub fn despawn_menu(mut commands: Commands, menu_query: Query<Entity, With<Menu>>) {
+    if let Ok(menu) = menu_query.get_single() {
+        commands.entity(menu).despawn_recursive();
     }
 }

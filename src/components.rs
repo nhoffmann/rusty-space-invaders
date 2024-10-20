@@ -4,8 +4,8 @@ use crate::prelude::*;
 
 #[derive(Resource)]
 pub struct Player {
-    lifes: i8,
-    score: i32,
+    pub lifes: i8,
+    pub score: i32,
 }
 
 impl Player {
@@ -16,10 +16,6 @@ impl Player {
     pub fn kill(&mut self) {
         info!("Player died");
         self.lifes -= 1;
-
-        if self.lifes == 0 {
-            info!("GAME OVER!")
-        }
     }
 
     pub fn lifes_left(&self) -> String {
@@ -336,3 +332,6 @@ impl Default for Difficulty {
         Self(100)
     }
 }
+
+#[derive(Component, Debug)]
+pub struct Menu;

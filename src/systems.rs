@@ -1,6 +1,6 @@
 use bevy::math::bounding::{Aabb2d, IntersectsVolume};
 
-use crate::prelude::*;
+use crate::{prelude::*, GameState};
 
 const LASER_SPEED: f32 = 8.;
 const CANNON_SPEED: f32 = 3.;
@@ -312,5 +312,57 @@ pub fn move_ufo(
         || ufo_transform.translation.x < LEFT_WALL - SPRITE_SIZE
     {
         commands.entity(entity).despawn();
+    }
+}
+
+pub fn check_game_over(
+    mut commands: Commands,
+    player: Res<Player>,
+    cannons: Query<Entity, With<Cannon>>,
+    enemies: Query<&Transform, With<Enemy>>,
+    mut next_state: ResMut<NextState<GameState>>,
+) {
+    let lifes_left = player.lifes;
+    let enemies_landed = !enemies
+        .iter()
+        .filter(|transform| transform.translation.y < BOTTOM_WALL + SPRITE_SIZE)
+        .collect::<Vec<&Transform>>()
+        .is_empty();
+
+    if lifes_left == 0 || enemies_landed {
+        info!("GAME OVER");
+        commands.spawn((TextBundle::from_section(
+            "GAME OVER",
+            TextStyle {
+                font_size: TEXT_SIZE,
+                color: TEXT_COLOR,
+                ..default()
+            },
+        )
+        .with_style(Style {
+            position_type: PositionType::Relative,
+            top: Val::Px(100.),
+            left: Val::Px(100.),
+            ..default()
+        }),));
+
+        commands.insert_resource(Time::<Fixed>::from_duration(Duration::from_secs(1000)));
+        if let Ok(cannon) = cannons.get_single() {
+            commands.entity(cannon).despawn();
+        }
+        next_state.set(GameState::GameOver);
+    }
+}
+
+pub fn handle_menu_buttons(
+    interaction_query: Query<(&Interaction, &ButtonAction), With<Button>>,
+    mut next_state: ResMut<NextState<GameState>>,
+) {
+    for (interaction, button_action) in interaction_query.iter() {
+        if *interaction == Interaction::Pressed {
+            match button_action {
+                ButtonAction::StartGame => next_state.set(GameState::Playing),
+            }
+        }
     }
 }
