@@ -71,7 +71,8 @@ fn main() {
                 spawn_lifes_ui,
                 spawn_score_ui,
                 setup_ufo_timer,
-            ),
+            )
+                .chain(),
         )
         .add_systems(
             Update,

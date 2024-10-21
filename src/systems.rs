@@ -367,7 +367,16 @@ pub fn check_level_complete(
     }
 }
 
-pub fn start_next_level(mut next_state: ResMut<NextState<GameState>>) {
+pub fn start_next_level(mut level: ResMut<Level>, mut next_state: ResMut<NextState<GameState>>) {
+    // increase level, which translates to the row that enemies get spawned on
+    if level.0 < 10. {
+        level.0 += 1.;
+    } else {
+        // wrap back to 1, as in the original game
+        level.0 = 1.;
+    }
+    info!("{:?}", level);
+
     next_state.set(GameState::Playing);
 }
 

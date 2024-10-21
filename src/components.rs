@@ -117,7 +117,7 @@ impl LaserBeamBundle {
                     ..default()
                 },
                 transform: Transform {
-                    scale: Vec2::new(1., 10.).extend(1.),
+                    scale: Vec2::new(3., 10.).extend(1.),
                     translation: Vec2::new(x, y + SPRITE_SIZE / 2.).extend(0.),
                     ..default()
                 },
@@ -338,3 +338,6 @@ pub struct Menu;
 
 #[derive(Component, Debug)]
 pub struct GameOverSign;
+
+#[derive(Resource, Debug)]
+pub struct Level(pub f32);

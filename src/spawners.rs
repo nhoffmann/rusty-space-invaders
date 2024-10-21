@@ -6,6 +6,7 @@ pub fn spawn_camera(mut commands: Commands) {
 
 pub fn setup_player(mut commands: Commands) {
     commands.insert_resource(Player::new());
+    commands.insert_resource(Level(1.));
 }
 
 pub fn reset(mut commands: Commands) {
@@ -98,9 +99,10 @@ pub fn spawn_ufo(
 pub fn spawn_enemies(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
+    level: Res<Level>,
     mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
 ) {
-    let mut y = TOP_WALL - SPRITE_SIZE;
+    let mut y = TOP_WALL - SPRITE_SIZE * level.0;
 
     // spawns a row of enemies
     for row in 0..5 {
